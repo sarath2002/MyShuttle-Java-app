@@ -10,10 +10,25 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+ - task: Maven@3
+   inputs:
+     mavenPomFile: 'pom.xml'
+     publishJUnitResults: true
+     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+     javaHomeOption: 'JDKVersion'
+     mavenVersionOption: 'Default'
+     mavenAuthenticateFeed: false
+     effectivePomSkip: false
+     sonarQubeRunAnalysis: false
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+ - task: CopyFiles@2
+   inputs:
+    SourceFolder: '$(build.sourcesdirectory)'
+    Contents: '**/*.jar'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+
+ - task: PublishBuildArtifacts@1
+   inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
